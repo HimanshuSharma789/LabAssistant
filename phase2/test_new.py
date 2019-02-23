@@ -3,11 +3,40 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 import os
+from broadcast_tab import broadcast_tab  
 
-
-class transfer_tab(QWidget):
+class ssh_tab(QWidget):
     def __init__(self):
         super().__init__()
+        
+        self.tab2_layout = QVBoxLayout()
+        self.label = QLabel()
+        self.label.setText("SSH window")
+        self.cmd_text = QLineEdit()
+        self.cmd_text.returnPressed.connect(self.display)
+        self.text_area = QPlainTextEdit()
+        self.text_area.setReadOnly(True)
+
+        self.tab2_layout.addWidget(self.label)
+        self.tab2_layout.addWidget(self.cmd_text)
+        self.tab2_layout.addWidget(self.text_area)
+        self.setLayout(self.tab2_layout)
+
+    def display(self):
+        import subprocess
+        self.text_area.appendPlainText('>>>> ' + self.cmd_text.text())
+        returned_output = subprocess.check_output(self.cmd_text.text())
+        print('>>>>', returned_output.decode("utf-8"))
+        self.text_area.appendPlainText(returned_output.decode("utf-8"))
+        
+
+
+'''
+
+class broadcast_tab(QWidget):
+    def __init__(self):
+        super().__init__()
+        
         # specify layout (horizontal* or vertical)
         self.tab1_layout = QVBoxLayout()
 
@@ -58,41 +87,71 @@ class transfer_tab(QWidget):
         if dlg.exec_():
             self.filenames = dlg.selectedFiles()
             self.browse_textBox.setText(",".join(self.filenames))
-            print(self.filenames)
+            print(self.filenames[0])
             return self.filenames
 
     def send_files(self):
-        cmd = "sshpass -p 'termux' scp -P 8022 %s u0_a191@192.168.43.1:~/ " % (self.filenames[0])
-        os.system(cmd)
-        os.system("termux")
+        print(opera.scp_query())
+        # cmd = "scp -P %s %s u0_a191@%s:~/ " % (self.ip_add_port_text, self.filenames, self.ip_add_text)
+        # os.system(cmd)
 
+'''
 
 class Application(QWidget):
     def __init__(self):
         super().__init__()
         self.setGeometry(150, 150, 550, 200)
         self.setWindowTitle("Virtual Lab Assistant")
-        print(self.platform())
+        self.platform()
+        # plat = self.platform() 
+        # if plat == 1:
+        #     import win as opera
+        #     global opera
+        # elif plat == -1:
+        #     import lin as opera
+        #     global opera
+        # else:
+        #     print("OS not identified")
         self.Assistant()
 
     def platform(self):
         import platform
         if platform.system() == 'Windows':
-            return 1
+            print("Windows")
+            import win as opera
+            global opera
         elif platform.system() == 'Linux':
-             return -1
+            print("linux")
+            import win as opera
+            global opera
         else:
+            print("error loading os")
             return 0
+
+    # def platform(self):
+    #     import platform
+    #     if platform.system() == 'Windows':
+    #         print("Windows")
+    #         return 1
+    #     elif platform.system() == 'Linux':
+    #         print("linux")
+    #         return -1
+    #     else:
+    #         return 0
 
 
     def Assistant(self):
         self.mainLayout = QVBoxLayout()
 
         self.tabs = QTabWidget()
-        self.tab2 = QWidget(parent=None)
 
-        self.tabs.addTab(transfer_tab(), "Transfer")
-        self.tabs.addTab(self.tab2, "Tab 2")
+        self.tabs.addTab(broadcast_tab(opera), "Broadcast")
+        
+        self.peer_tab = QWidget(parent=None)
+        self.tabs.addTab(self.peer_tab, "P2P")
+        
+        self.tabs.addTab(ssh_tab(), "SSH")
+
 
         self.mainLayout.addWidget(self.tabs)
         self.setLayout(self.mainLayout)
