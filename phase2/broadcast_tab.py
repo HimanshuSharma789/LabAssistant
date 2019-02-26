@@ -4,6 +4,8 @@ from PyQt5.QtWidgets import *
 class broadcast_tab(QWidget):
     def __init__(self, op):
         super().__init__()
+        
+        # opera --> operating system
         global opera
         opera = op
         print(opera)
@@ -60,7 +62,10 @@ class broadcast_tab(QWidget):
             print(self.filenames[0])
             return self.filenames
 
+    
+    # function initiated when the send button is clicked
     def send_files(self):
+        # dummy function to call for windows/linux os
         print(opera.scp_query())
         # cmd = "scp -P %s %s u0_a191@%s:~/ " % (self.ip_add_port_text, self.filenames, self.ip_add_text)
         # os.system(cmd)
